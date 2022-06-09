@@ -1,0 +1,21 @@
+type Query {
+    meals: [Meal!]
+    meal(id: String!): Meal
+    mealtags: [MealTag!]
+    mealtag(id: ID!): MealTag
+    suggestedMeals(id: ID!): [Meal!]!
+}
+
+type Meal {
+    id: ID!
+    name: String!
+    location: String!
+    description: String
+    photoUrl: String
+    tagIds: [ID!]
+}
+
+type MealTag {
+    id: ID!
+    name: String!
+}
