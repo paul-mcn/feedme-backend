@@ -4,6 +4,7 @@ type Query {
     mealtags: [MealTag!]
     mealtag(id: ID!): MealTag
     suggestedMeals(id: ID!): [Meal!]!
+    favouriteMeals(id: ID!): [Meal!]!
 }
 
 type Meal {
@@ -12,10 +13,24 @@ type Meal {
     location: String!
     description: String
     photoUrl: String
+    rating: String
+    tagIds: [ID!]
+}
+
+input MealInput {
+    name: String!
+    location: String!
+    description: String
+    photoUrl: String
+    rating: String
     tagIds: [ID!]
 }
 
 type MealTag {
     id: ID!
     name: String!
+}
+
+type Mutation {
+    addMeal(newMeal: MealInput!): Meal
 }

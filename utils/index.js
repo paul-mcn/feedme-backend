@@ -47,6 +47,16 @@ const util = {
      */
     getUnixFromTimestamp(...args) {
         return Math.floor(new Date(...args).getTime() / 1000);
+    },
+    /**
+     * @param {*[]} meals array of meals
+     * @param {number} mealCount count of random meals to be returned
+     * @returns meals array
+     */
+    filterRandomMeals(meals, mealCount) {
+        const indexArray = util.shuffleArray(meals.length);
+        const filteredIndexArray = indexArray.slice(0, mealCount);
+        return filteredIndexArray.map(idx => meals[idx]);
     }
 }
 

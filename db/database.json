@@ -1,70 +1,88 @@
 {
   "meals": [
     {
-      "id": "1",
+      "id": "1db7e310-5661-4a52-8711-ebd198de9197",
       "name": "Turkey",
+      "type":"meal",
       "location": "Book 1 pg 3",
       "description": "Saepe nobis et illum iusto voluptates et unde.",
+      "rating": 3,
       "photoUrl": "https://food.fnr.sndimg.com/content/dam/images/food/fullset/2010/8/12/0/FN-Thanksgiving-2010_Thanksgiving-Turkey_s4x3.jpg.rend.hgtvcom.616.462.suffix/1382539519750.jpeg"
     },
     {
-      "id": "2",
+      "id": "84306760-cd2d-490e-ae5e-9db7e9a9f8d1",
       "name": "Chicken",
+      "type":"meal",
       "location": "Book 4 pg 53",
       "description": "Ad quod quasi velit iusto dolorem.",
+      "rating": 2,
       "photoUrl": "https://assets.bonappetit.com/photos/5d7296eec4af4d0008ad1263/5:4/w_3165,h_2532,c_limit/Basically-Gojuchang-Chicken-Recipe-Wide.jpg"
     },
     {
-      "id": "3",
+      "id": "65d047b9-3118-4d00-908d-41aea022c09e",
       "name": "Pasta",
+      "type":"meal",
       "location": "Book 15 pg 64",
       "description": "eligendi perspiciatis totam",
+      "rating": 4,
       "photoUrl": "https://cdn.apartmenttherapy.info/image/upload/f_jpg,q_auto:eco,c_fill,g_auto,w_1500,ar_1:1/k%2Farchive%2F0eb929bc2c007ebf6009316a327b1e37587045a4"
     },
     {
-      "id": "4",
+      "id": "424a28cc-c3b0-43fc-bf75-6511296ca9b2",
       "name": "Curry",
+      "type":"meal",
       "location": "Book 4 pg 5",
       "description": "Enim debitis cumque id voluptatem. Odit dolorumfdfdsdffdnemo fuga ab maiores et vitae.",
+      "rating": 4.5,
       "photoUrl": "https://hips.hearstapps.com/del.h-cdn.co/assets/17/31/1501791674-delish-chicken-curry-horizontal.jpg?crop=1.00xw:0.750xh;0,0.159xh&resize=640:*"
     },
     {
-      "id": "5",
+      "id": "b075a626-23f0-456c-9be4-9e3073fbfd5c",
       "name": "Meatballs",
+      "type":"meal",
       "location": "Book 1 pg 17",
       "description": "Repellat et et.",
+      "rating": 4,
       "photoUrl": "https://www.eatwell101.com/wp-content/uploads/2019/02/chicken-meal-prep-menu.jpg"
     },
     {
-      "id": "6",
+      "id": "4fde9580-4738-4f36-ae94-0e8033e45da6",
       "name": "Fish",
+      "type":"meal",
       "location": "Book 1 pg 4",
       "description": "Illum placeat natus esse.",
+      "rating": 5,
       "photoUrl": "https://hips.hearstapps.com/del.h-cdn.co/assets/15/34/1440009947-weeknight-dinner-snapper-1.jpg"
     },
     {
-      "id": "7",
+      "id": "574aed95-7127-45b9-ba4b-26222459ca22",
       "name": "Stir fry with oyster-sauce",
+      "type":"meal",
       "location": "Book 1 pg 5",
       "description": "Quia fugiat voluptatem fuga.",
+      "rating": 3,
       "photoUrl": "https://www.sbs.com.au/food/sites/sbs.com.au.food/files/styles/full/public/beef-with-broccoli.jpg?itok=CXt_PhWz"
     }
   ],
   "mealtags": [
     {
-      "id": "1",
+      "id": "1a936ce3-a442-4f65-8b5b-ce2183f625f9",
+      "type":"mealtag",
       "name": "Chicken"
     },
     {
-      "id": "2",
+      "id": "669b670e-5436-4058-8d03-a3943ef52f65",
+      "type":"mealtag",
       "name": "Vegan"
     },
     {
-      "id": "3",
+      "id": "db531aba-e37d-40b0-872d-7aca87be4a93",
+      "type":"mealtag",
       "name": "Curry"
     },
     {
-      "id": "4",
+      "id": "c96a5690-4553-4821-be9d-85dc7dba9b8c",
+      "type":"mealtag",
       "name": "Spicy"
     }
   ],
@@ -74,15 +92,23 @@
       "name": "Paul",
       "suggestedMeals": {
         "ids": [
-          "6",
-          "2",
-          "1",
-          "3",
-          "4",
-          "5",
-          "7"
+          "4fde9580-4738-4f36-ae94-0e8033e45da6",
+          "84306760-cd2d-490e-ae5e-9db7e9a9f8d1",
+          "1db7e310-5661-4a52-8711-ebd198de9197",
+          "65d047b9-3118-4d00-908d-41aea022c09e",
+          "424a28cc-c3b0-43fc-bf75-6511296ca9b2",
+          "b075a626-23f0-456c-9be4-9e3073fbfd5c",
+          "574aed95-7127-45b9-ba4b-26222459ca22"
         ],
         "expiryDate": "2022-01-21T23:07:09.000Z"
+      },
+      "favouriteMeals": {
+        "ids":[
+          "574aed95-7127-45b9-ba4b-26222459ca22",
+          "84306760-cd2d-490e-ae5e-9db7e9a9f8d1",
+          "1db7e310-5661-4a52-8711-ebd198de9197",
+          "424a28cc-c3b0-43fc-bf75-6511296ca9b2"
+        ]
       }
     }
   ]
