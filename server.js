@@ -28,6 +28,15 @@ module.exports = {
             })
         );
 
+        app.get('/', (req, res, next) => {
+            try {
+                res.send("Hello World")
+            } catch (error) {
+                console.log(error)
+                next(error)
+            }
+        })
+
         app.use('/api/graphql', graphqlHTTP({
             schema: addResolversToSchema({ schema, resolvers: schemaResolvers }),
             graphiql: true
