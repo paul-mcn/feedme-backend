@@ -43,7 +43,7 @@ module.exports = {
         }))
 
         // server start-up message
-        const serverStartupMessage = `Server starting on http://${host}/ 🚀🚀\nGraphQL API server at http://${host}/api/graphql`
+        const serverStartupMessage = `Server starting on http://${host}/ \nGraphQL API server at http://${host}/api/graphql`
 
         // port 4000
         app.listen(port, () => console.log(serverStartupMessage));
