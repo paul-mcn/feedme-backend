@@ -28,12 +28,21 @@ module.exports = {
             })
         );
 
+        app.get('/', (req, res, next) => {
+            try {
+                res.send("Hello World")
+            } catch (error) {
+                console.log(error)
+                next(error)
+            }
+        })
+
         app.use('/api/graphql', graphqlHTTP({
             schema: addResolversToSchema({ schema, resolvers: schemaResolvers }),
             graphiql: true
         }))
 
-        // server start-up messagepauly
+        // server start-up message
         const serverStartupMessage = `Server starting on http://${host}/ \nGraphQL API server at http://${host}/api/graphql`
 
         // port 4000
