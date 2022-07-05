@@ -75,8 +75,6 @@ const resolvers = (database) => {
                     return meals.find(meal => mealId === meal.id)
                 })
 
-                console.log(favouriteMeals)
-
                 return favouriteMeals
             }
         },

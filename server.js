@@ -13,7 +13,7 @@ const database = new Database()
 
 module.exports = {
     init: async () => {
-        return await database.init()
+        return await database.init();
     },
     run: () => {
 
@@ -33,10 +33,10 @@ module.exports = {
             graphiql: true
         }))
 
-        // server start-up message
-        const serverStartupMessage = `Server starting on http://${host}/ 🚀🚀\nGraphQL API server at http://${host}/api/graphql`
+        // server start-up messagepauly
+        const serverStartupMessage = `Server starting on http://${host}/ \nGraphQL API server at http://${host}/api/graphql`
 
         // port 4000
-        app.listen(port, () => console.log(serverStartupMessage));
+        app.listen(port, () => { console.log(serverStartupMessage) });
     }
 }

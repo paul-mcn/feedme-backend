@@ -1,3 +1,3 @@
 const server = require('./server');
 
-server.init().then(() => server.run())
+server.init().then(database => server.run())
