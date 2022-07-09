@@ -4,7 +4,7 @@ const { graphqlHTTP } = require('express-graphql');
 const { addResolversToSchema } = require('@graphql-tools/schema');
 const schema = require('./schemas');
 const { resolvers } = require('./resolvers');
-const { host, port } = require('./config');
+const { host, port, mode } = require('./config');
 const Database = require('./db');
 
 const app = express();
@@ -16,36 +16,31 @@ module.exports = {
         return await database.init();
     },
     run: () => {
-
         const schemaResolvers = resolvers(database)
 
         app.use(
             cors({
                 // React server
                 // origin: ["http://127.0.0.1:3000", "http://localhost:3000", "http://192.168.20.14:3000"],
-                origin: "*",
+                origin: "http://localhost:3000",
+                // origin: "https://organisemymeals.com",
                 credentials: true
             })
         );
 
-        app.get('/', (req, res, next) => {
-            try {
-                res.send("Hello World")
-            } catch (error) {
-                console.log(error)
-                next(error)
-            }
-        })
-
-        app.use('/api/graphql', graphqlHTTP({
+        app.use('/graphql', graphqlHTTP({
             schema: addResolversToSchema({ schema, resolvers: schemaResolvers }),
-            graphiql: true
+            graphiql: (mode === 'development')
         }))
 
         // server start-up message
-        const serverStartupMessage = `Server starting on http://${host}/ \nGraphQL API server at http://${host}/api/graphql`
+        const serverStartupMessage = `Server starting on http://${host}/ \nGraphQL API server at http://${host}/graphql`
 
         // port 4000
-        app.listen(port, () => { console.log(serverStartupMessage) });
+        if (mode === 'development') {
+            app.listen(port, () => { console.log(serverStartupMessage) });
+        } else {
+            app.listen();
+        }
     }
 }
