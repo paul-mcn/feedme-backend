@@ -6,6 +6,7 @@ const schema = require('./schemas');
 const { resolvers } = require('./resolvers');
 const { host, port, mode } = require('./config');
 const Database = require('./db');
+const fs = require('fs')
 
 const app = express();
 
@@ -33,11 +34,19 @@ module.exports = {
             graphiql: (mode === 'development')
         }))
 
-        // server start-up message
-        const serverStartupMessage = `Server starting on http://${host}/ \nGraphQL API server at http://${host}/graphql`
+        app.use((err, req, res, next) => {
+            fs.appendFile("crashlog.log", err.stack, (err) => {
+                if (err) {
+                    return console.log(err)
+                }
+            })
+        })
 
-        // port 4000
+
         if (mode === 'development') {
+            // server start-up message
+            const serverStartupMessage = `Server starting on http://${host}/ \nGraphQL API server at http://${host}/graphql`
+            // port 4000
             app.listen(port, () => { console.log(serverStartupMessage) });
         } else {
             app.listen();
