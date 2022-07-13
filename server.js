@@ -19,12 +19,14 @@ module.exports = {
     run: () => {
         const schemaResolvers = resolvers(database)
 
+        const origin = (mode === 'development')
+            ? ["http://127.0.0.1:3000", "http://localhost:3000", "http://192.168.20.14:3000"]
+            : "https://organisemymeals.com"
+
         app.use(
             cors({
                 // React server
-                // origin: ["http://127.0.0.1:3000", "http://localhost:3000", "http://192.168.20.14:3000"],
-                origin: "http://localhost:3000",
-                // origin: "https://organisemymeals.com",
+                origin: origin,
                 credentials: true
             })
         );
