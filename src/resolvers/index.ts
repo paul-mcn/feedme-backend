@@ -1,10 +1,7 @@
-const { filterRandomMeals, getUnixFromTimestamp } = require('../utils');
-const Database = require('../db')
+import type Database from '../db';
+import { filterRandomMeals, getUnixFromTimestamp } from '../utils';
 
-/**
- * @param {Database} database 
- */
-const resolvers = (database) => {
+export const resolvers = (database: Database) => {
     return {
         Query: {
             meals: async (parent, args, context) => {
@@ -30,7 +27,6 @@ const resolvers = (database) => {
                     // get all the suggested meals for a particular user
                     if (!user) console.log(user)
                     const { ids, expiryDate } = user.suggestedMeals;
-
 
                     const currentDate = getUnixFromTimestamp();
 
@@ -87,6 +83,4 @@ const resolvers = (database) => {
         }
     }
 }
-
-module.exports = { resolvers }
 

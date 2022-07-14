@@ -2,7 +2,12 @@
     "compilerOptions": {
         "outDir": "./built",
         "allowJs": true,
-        "target": "ES6",
+        "target": "ESNext",
+        "module": "CommonJS",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        // "watch": true
     },
-    "include": ["./src/**/*"]
+    "include": ["./src/**/*"],
 }
