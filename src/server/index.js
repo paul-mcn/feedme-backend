@@ -2,10 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const { graphqlHTTP } = require('express-graphql');
 const { addResolversToSchema } = require('@graphql-tools/schema');
-const schema = require('./schemas');
-const { resolvers } = require('./resolvers');
-const { host, port, mode } = require('./config');
-const Database = require('./db');
+const schema = require('../schemas');
+const { resolvers } = require('../resolvers');
+const { host, port, mode } = require('../config');
+const Database = require('../db');
 const fs = require('fs')
 
 const app = express();
