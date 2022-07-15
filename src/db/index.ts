@@ -14,7 +14,6 @@ class Database {
     constructor(databaseId = 'OrganiseMyMeals') {
         this.client = new CosmosClient({ endpoint: azureEndpointUri, key: azurePrimaryKey });
         this.databaseId = databaseId
-        this.containers = { mealContainer: null, userContainer: null }
     }
 
     async init() {
@@ -40,6 +39,7 @@ class Database {
             return resources;
         } catch (error) {
             console.log(error)
+            throw Error("Error when fetching query")
         }
     }
 
@@ -58,6 +58,7 @@ class Database {
             return items[0];
         } catch (error) {
             console.log(error)
+            throw Error("Could not get Meal")
         }
     }
 
@@ -69,32 +70,43 @@ class Database {
             return resources
         } catch (error) {
             console.log(error)
+            throw Error("Could not get meals")
         }
     }
 
     async getMealTag(id: string): Promise<MealTag> {
-        const querySpec = {
-            query: "SELECT * FROM c WHERE c.type = @type AND c.id = @id",
-            parameters: [
-                { name: "@id", value: id },
-                { name: "@type", value: "mealtag" },
-            ]
+        try {
+            const querySpec = {
+                query: "SELECT * FROM c WHERE c.type = @type AND c.id = @id",
+                parameters: [
+                    { name: "@id", value: id },
+                    { name: "@type", value: "mealtag" },
+                ]
+            }
+            const { resources: [mealTag] } = await this.containers.mealContainer.items
+                .query(querySpec).fetchAll()
+            return mealTag
+        } catch (error) {
+            console.log(error)
+            throw Error("Could not get meal tag")
         }
-        const { resources: [mealTag] } = await this.containers.mealContainer.items
-            .query(querySpec).fetchAll()
-        return mealTag
     }
 
     async getMealTags(): Promise<MealTag[]> {
-        const querySpec = {
-            query: "SELECT * FROM c WHERE c.type = @type",
-            parameters: [
-                { name: "@type", value: "mealtag" },
-            ]
+        try {
+            const querySpec = {
+                query: "SELECT * FROM c WHERE c.type = @type",
+                parameters: [
+                    { name: "@type", value: "mealtag" },
+                ]
+            }
+            const { resources } = await this.containers.mealContainer.items
+                .query(querySpec).fetchAll()
+            return resources
+        } catch (error) {
+            console.log(error)
+            throw Error("Could not get meal tags")
         }
-        const { resources } = await this.containers.mealContainer.items
-            .query(querySpec).fetchAll()
-        return resources
     }
 
     async addMeals(item: Meal[]) {
@@ -152,7 +164,9 @@ class Database {
             return resources[0]
         } catch (error) {
             console.log(error)
+            throw Error("Could not get user")
         }
+
     }
 }
 

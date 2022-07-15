@@ -47,10 +47,10 @@ export const shuffleArray = (length) => {
 
 /**
  * Gets time in UNIX from timestamp. If no args supplied then time will be created from now.
- * @param {string | number | Date} args e.g. "2022-01-21T23:07:09.000Z" or same arguments for the Date Object.
+ * @param {any} args e.g. "2022-01-21T23:07:09.000Z" or same arguments for the Date Object.
  * @returns unix number
  */
-export const getUnixFromTimestamp = (args?: string | number | Date) => {
+export const getUnixFromTimestamp = (args?: any) => {
     return Math.floor(new Date(args).getTime() / 1000);
 }
 

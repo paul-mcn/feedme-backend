@@ -41,7 +41,7 @@ class Server {
                 graphiql: (mode === 'development')
             })
 
-            app.use(express.urlencoded({ extended: false }))
+            // app.use(express.urlencoded({ extended: false }))
 
             app.use(
                 cors({

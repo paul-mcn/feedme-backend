@@ -1,24 +1,25 @@
 import type Database from '../db';
 import { filterRandomMeals, getUnixFromTimestamp } from '../utils';
+import type { IAddResolversToSchemaOptions } from '@graphql-tools/utils'
 
-export const resolvers = (database: Database) => {
+export const resolvers = (database: Database): any => {
     return {
         Query: {
-            meals: async (parent, args, context) => {
+            meals: async (parent: any, args: any, context: any) => {
                 return await database.getMeals()
             },
-            meal: async (parent, args, context) => {
+            meal: async (parent: any, args: any, context: any) => {
                 const { id } = args;
                 return await database.getMeal(id)
             },
-            mealtags: async (parent, args, context) => {
+            mealtags: async (parent: any, args: any, context: any) => {
                 return await database.getMealTags()
             },
-            mealtag: async (parent, args, context) => {
+            mealtag: async (parent: any, args: any, context: any) => {
                 const { id } = args;
                 return await database.getMealTag(id)
             },
-            suggestedMeals: async (parent, args, context) => {
+            suggestedMeals: async (parent: any, args: any, context: any) => {
                 // returns 7 randomly suggested meals for the week
                 const { id } = args;
                 try {
@@ -26,7 +27,7 @@ export const resolvers = (database: Database) => {
                     const user = await database.getUser(id)
                     // get all the suggested meals for a particular user
                     if (!user) console.log(user)
-                    const { ids, expiryDate } = user.suggestedMeals;
+                    const { ids: favMealIds, expiryDate } = user.suggestedMeals;
 
                     const currentDate = getUnixFromTimestamp();
 
@@ -34,7 +35,12 @@ export const resolvers = (database: Database) => {
 
                     const meals = await database.getMeals()
 
-                    if (!ids || hasExpired) {
+                    if (favMealIds && !hasExpired) {
+                        const CACHE = {}
+                        meals.forEach((meal, idx) => CACHE[meal.id] = idx)
+                        const favMeals = favMealIds.map(favMealId => meals[CACHE[favMealId]])
+                        return favMeals;
+                    } else {
                         const newSuggestedMeals = filterRandomMeals(meals, 7);
                         // TODO: update expiry date
                         // set the date 7 days from now
@@ -42,17 +48,6 @@ export const resolvers = (database: Database) => {
                         // expiryDate = dateOneWeekFromNow;
 
                         return newSuggestedMeals;
-                    } else {
-                        let existingMealSuggestions = [];
-                        console.log(meals)
-                        for (const meal of meals) {
-                            for (const mealId of ids) {
-                                if (mealId === meal.id) {
-                                    existingMealSuggestions.push(meal);
-                                }
-                            }
-                        }
-                        return existingMealSuggestions;
                     }
 
                 } catch (error) {
@@ -60,7 +55,7 @@ export const resolvers = (database: Database) => {
                     return []
                 }
             },
-            favouriteMeals: async (parent, args, context) => {
+            favouriteMeals: async (parent: any, args: any, context: any) => {
                 const { id } = args;
 
                 const user = await database.getUser(id)
@@ -75,7 +70,7 @@ export const resolvers = (database: Database) => {
             }
         },
         Mutation: {
-            addMeal: async (parent, args, context) => {
+            addMeal: async (parent: any, args: any, context: any) => {
                 console.log(args)
                 // const { meal } = args;
                 // console.log(meal)
