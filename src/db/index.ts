@@ -2,7 +2,7 @@ import { CosmosClient, Container } from '@azure/cosmos'
 import { azureEndpointUri, azurePrimaryKey } from '../config'
 import type { Meal, MealTag, User } from './interfaces'
 
-class Database {
+export class Database {
     client: CosmosClient;
     databaseId: string;
     containers: {
@@ -52,10 +52,10 @@ class Database {
                 ]
             };
             // read all items in the Items container
-            const { resources: items } = await this.containers.mealContainer.items
+            const { resources: [meal] } = await this.containers.mealContainer.items
                 .query(querySpec)
                 .fetchAll();
-            return items[0];
+            return meal;
         } catch (error) {
             console.log(error)
             throw Error("Could not get Meal")
@@ -141,9 +141,10 @@ class Database {
     async deleteMeals(ids: string[]) {
         try {
             // TODO: Delete all items in array
-            console.log("WARNING: Only deleting first item in array, TODO: Delete all items in array")
-            const response = await this.containers.mealContainer.item(ids[0], ids[0]).delete();
-            return response;
+            // console.log("WARNING: Only deleting first item in array, TODO: Delete all items in array")
+            // const response = await this.containers.mealContainer.item(ids[0], ids[0]).delete();
+            // return response;
+            throw new Error("Delete Meals is not implemented yet")
         } catch (error) {
             console.log(error)
         }
@@ -157,17 +158,16 @@ class Database {
                     { name: "@id", value: id }
                 ]
             }
-            const { resources } = await this.containers.userContainer.items
+            const { resources: [user] } = await this.containers.userContainer.items
                 .query(querySpec)
                 .fetchAll()
 
-            return resources[0]
+            return user
         } catch (error) {
             console.log(error)
             throw Error("Could not get user")
         }
-
     }
 }
 
-export default Database
+export default new Database()
