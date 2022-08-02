@@ -11,6 +11,7 @@ export class Database {
     }
     container: Container
 
+
     constructor(databaseId = 'OrganiseMyMeals') {
         this.client = new CosmosClient({ endpoint: azureEndpointUri, key: azurePrimaryKey });
         this.databaseId = databaseId
