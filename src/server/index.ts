@@ -1,20 +1,11 @@
 // import libraries
 import express from "express";
-import cors from "cors";
-import { graphqlHTTP } from "express-graphql";
-import { addResolversToSchema } from "@graphql-tools/schema";
-import schema from "../schemas";
-import { resolvers } from "../resolvers";
+import typeDefs from "src/schemas";
+import resolvers from "src/resolvers";
 import { host, port, mode } from "../config";
 import database from "../db";
-import fs from "fs";
-import { log } from "../utils";
-
-// import types
-import type { ErrorRequestHandler, RequestHandler } from "express";
-
-// init app
-const app = express();
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
 
 class Server {
   corsOrigin: string | string[];
@@ -24,39 +15,25 @@ class Server {
   }
 
   private init = () => {
-    database.init().then(() => {
-      const schemaResolvers = resolvers();
-
-      const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-        log.createErrorLogFile("crashlog.log", err.stack);
-      };
-
-      const graphqlHttp = graphqlHTTP({
-        schema: addResolversToSchema({ schema, resolvers: schemaResolvers }),
-        graphiql: mode === "development",
+    database.init().then(async () => {
+      // The ApolloServer constructor requires two parameters: your schema
+      // definition and your set of resolvers.
+      const server = new ApolloServer({
+        typeDefs,
+        resolvers,
       });
 
-      app.use(
-        cors({
-          origin: this.corsOrigin,
-          credentials: true,
-        })
-      );
+      // Passing an ApolloServer instance to the `startStandaloneServer` function:
+      //  1. creates an Express app
+      //  2. installs your ApolloServer instance as middleware
+      //  3. prepares your app to handle incoming requests
+      const { url } = await startStandaloneServer(server, {
+        listen: { port },
+      });
 
-      app.use("/graphql", graphqlHttp);
-
-      app.use(errorHandler);
-
-      if (mode === "production") {
-        app.listen();
-      } else {
-        // server start-up message
-        const serverStartupMessage = `Server starting on http://${host}/ \nGraphQL API server at http://${host}/graphql 🚀🚀`;
-
-        // port 4000
-        app.listen(port, () => {
-          console.log(serverStartupMessage);
-        });
+      if (mode !== "production") {
+        const serverStartupMessage = `Server starting on ${url}/ \nGraphQL API server at ${url}/graphql 🚀🚀`;
+        console.log(serverStartupMessage);
       }
     });
   };

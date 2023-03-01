@@ -1,8 +1,5 @@
 FROM node:16
 
-# env variables
-ARG PORT=4000
-
 # Create app directory
 WORKDIR /usr/src/app/backend
 
@@ -17,7 +14,5 @@ RUN npm install
 
 # copy source code into the image
 COPY . .
-
-EXPOSE ${PORT}
 
 CMD [ "npm", "run", "dev" ]

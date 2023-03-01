@@ -1,9 +1,9 @@
-import { join } from 'path';
-import { loadSchemaSync } from '@graphql-tools/load';
-import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
+import { join } from "path";
+import { gql } from "apollo-server";
+import {}
 
-const schemas = loadSchemaSync(join(__dirname, './*.graphql'), {
-    loaders: [new GraphQLFileLoader()]
-})
+const schemas = loadSchemaSync(join(__dirname, "./*.graphql"), {
+  loaders: [new GraphQLFileLoader()],
+});
 
-export default schemas
+export default schemas;

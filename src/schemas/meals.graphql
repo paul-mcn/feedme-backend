@@ -1,36 +1,93 @@
+"""
+All the queries possible
+"""
 type Query {
-    meals: [Meal!]
-    meal(id: String!): Meal
-    mealtags: [MealTag!]
-    mealtag(id: ID!): MealTag
-    suggestedMeals(id: ID!): [Meal!]!
-    favouriteMeals(id: ID!): [Meal!]!
+  
+	# Get an array of all available meals
+  meals: [Meal!]
+  
+	# Get a one meal using its id
+  meal(id: String!): Meal
+  
+	# Get an array of meal tags
+  mealtags: [MealTag!]
+  
+	# Get information about meal tag based on its id
+  mealtag(id: ID!): MealTag
+  
+	# Get suggested meals for a user based on their id
+  suggestedMeals(id: ID!): [Meal!]!
+  
+	# Get an array of meals
+  favouriteMeals(id: ID!): [Meal!]!
 }
 
+"""
+Contains information about a meal
+"""
 type Meal {
-    id: ID!
-    name: String!
-    location: String!
-    description: String
-    photoUrl: String
-    rating: String
-    tagIds: [ID!]
+  
+	# id of the meal
+  id: ID!
+  
+	# name of the meal e.g "Chicken strips"
+  name: String!
+  
+	# where the meal is located e.g. "Harrys Cookbook pg 4" or "https://example.com/...."
+  location: String!
+  
+	# short blurb describing the meal (optional)
+  description: String
+  
+	# the url of the meal
+  photoUrl: String
+  
+	# rating of the meal TODO: change to Int
+  rating: String
+  
+	# meal tag/cateogry ids
+  tagIds: [ID!]
 }
 
+"""
+Input needed to create a meal
+"""
 input MealInput {
-    name: String!
-    location: String!
-    description: String
-    photoUrl: String
-    rating: String
-    tagIds: [ID!]
+  
+	# name of the meal e.g "Chicken strips"
+  name: String!
+  
+	# where the meal is located e.g. "Harrys meal essentials pg 4" or "https://example.com/...."
+  location: String!
+  
+	# short blurb describing the meal
+  description: String
+  
+	# the url of the meal
+  photoUrl: String
+  
+	# rating of the meal TODO: change to Int
+  rating: String
+  
+	# meal tag/cateogry ids
+  tagIds: [ID!]
 }
 
+
+"""
+A tag to identify and categories types of meals.
+"""
 type MealTag {
-    id: ID!
-    name: String!
+  
+	# id of meal  
+  id: ID!
+  
+	# meal tag name
+  name: String!
 }
 
 type Mutation {
-    addMeal(newMeal: MealInput!): Meal
+  
+	# adds a new meal
+  addMeal(newMeal: MealInput!): Meal
 }

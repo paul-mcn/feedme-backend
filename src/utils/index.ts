@@ -1,4 +1,3 @@
-import * as log from "./log";
-import * as random from './random'
+import * as random from "./random";
 
-export { log, random };
+export { random };
