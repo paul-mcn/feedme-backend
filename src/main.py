@@ -29,6 +29,18 @@ fake_users_db = {
     },
 }
 
+fake_meals_db = [
+    {
+        "name": "Spaghetti",
+        "price": 10.99,
+    },
+    {
+        "name": "Lasagna",
+        "price": 13.99,
+    },
+]
+
+
 app = FastAPI()
 
 
