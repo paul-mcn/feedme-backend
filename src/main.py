@@ -74,7 +74,6 @@ class UserInDB(User):
 class Item(BaseModel):
     name: str
     price: float
-    is_offer: Union[bool, None] = None
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -170,8 +169,8 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]
     return current_user
 
 
-@app.get("/users/me/items/")
-async def read_own_items(
+@app.get("/users/me/meals/")
+async def read_own_meals(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     return [{"item_id": "Foo", "owner": current_user.username}]
@@ -182,16 +181,16 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/items/")
-async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
-    return {"token": token}
+@app.get("/meals/")
+async def read_meals(token: Annotated[str, Depends(oauth2_scheme)]):
+    return {"token": token, "meals": fake_meals_db}
 
 
-@app.get("/items/{item_id}")
+@app.get("/meals/{item_id}")
 async def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 
-@app.put("/items/{item_id}")
+@app.put("/meals/{item_id}")
 async def update_item(item_id: int, item: Item):
     return {"item_name": item.name, "item_id": item_id}
