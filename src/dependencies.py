@@ -25,11 +25,17 @@ fake_meals_db = [
     {
         "id": "1",
         "name": "Spaghetti",
+        "ingredients": ["Pasta", "Tomato Sauce"],
+        "description": "Fresh spaghetti with tomato sauce",
+        "imageURL": "https://sugarspunrun.com/wp-content/uploads/2023/09/Spaghetti-Meat-Sauce-1-of-1-3.jpg",
         "price": 10.99,
     },
     {
         "id": "2",
         "name": "Lasagna",
+        "ingredients": ["Meat", "Cheese", "Tomato Sauce"],
+        "description": "Tasty lasagna with meat sauce",
+        "imageURL": "https://www.kitchensanctuary.com/wp-content/uploads/2020/10/Lasagne-square-FS-79.jpg",
         "price": 13.99,
     },
 ]
