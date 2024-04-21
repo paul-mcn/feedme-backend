@@ -21,12 +21,27 @@ fake_users_db = {
     },
 }
 
+fake_meals_db = [
+    {
+        "id": "1",
+        "name": "Spaghetti",
+        "price": 10.99,
+    },
+    {
+        "id": "2",
+        "name": "Lasagna",
+        "price": 13.99,
+    },
+]
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 def fake_hash_password(password: str):
     return "fakehashed" + password
+
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -93,5 +108,3 @@ async def get_current_active_user(
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
-
-

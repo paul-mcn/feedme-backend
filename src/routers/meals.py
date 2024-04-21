@@ -1,25 +1,14 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
+from ..dependencies import fake_meals_db
 
-router = APIRouter(
-)
-
-fake_meals_db = [
-    {
-        "name": "Spaghetti",
-        "price": 10.99,
-    },
-    {
-        "name": "Lasagna",
-        "price": 13.99,
-    },
-]
+router = APIRouter()
 
 
 @router.get("")
 async def read_meals():
-# async def read_meals(token: Annotated[str, Depends(oauth2_scheme)]):
-    return {"token": "token", "meals": fake_meals_db}
+    # async def read_meals(token: Annotated[str, Depends(oauth2_scheme)]):
+    return {"meals": fake_meals_db}
 
 
 # @router.get("/{item_id}")
@@ -30,4 +19,3 @@ async def read_meals():
 # @router.put("/item_id}")
 # async def update_item(item_id: int, item: Item):
 #     return {"item_name": item.name, "item_id": item_id}
-
