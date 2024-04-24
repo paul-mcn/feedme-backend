@@ -6,6 +6,10 @@ from passlib.context import CryptContext
 
 from fastapi import Depends, HTTPException, status
 from .schemas import TokenData, User, UserInDB
+import boto3
+from boto3.dynamodb.types import TypeDeserializer
+
+client = boto3.client("dynamodb")
 
 SECRET_KEY = "c514d86f164e955c01a06db43497aa2a2ce6950b77388259e8bd4916f4134054"
 ALGORITHM = "HS256"
@@ -45,6 +49,21 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+def dynamodb_to_user(user):
+    return {
+        "id": user["EntityId"],
+        "email": user["EntityId"],
+        "firstName": user["FirstName"],
+        "lastName": user["LastName"],
+        "hashed_password": user["HashedPassword"],
+    }
+
+
+def deserialize_item(item):
+    item = {k: TypeDeserializer().deserialize(v) for k, v in item.items()}
+    return item
+
+
 def fake_hash_password(password: str):
     return "fakehashed" + password
 
@@ -57,8 +76,8 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -77,14 +96,21 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
+def get_user(username: str):
+    response = client.get_item(
+        TableName="MainTable",
+        Key={"EntityType": {"S": "account"}, "EntityId": {"S": username}},
+    )
+    serialized_user = response.get("Item")
+    print("serialized_user", serialized_user)
+    if serialized_user:
+        deserialized_user = deserialize_item(response.get("Item"))
+        user = dynamodb_to_user(deserialized_user)
+        return UserInDB(**user)
 
 
 def fake_decode_token(token):
-    user = get_user(fake_users_db, token)
+    user = get_user(token)
     return user
 
 
@@ -102,15 +128,13 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(fake_users_db, username=token_data.username)
+    user = get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
 
 
-async def get_current_active_user(
-    current_user: Annotated[User, Depends(get_current_user)],
-):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
+def get_current_user_meals(current_user: Annotated[User, Depends(get_current_user)]):
+    print("current_user", current_user)
+    # response = client.
+    # return
