@@ -5,7 +5,7 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 
 from fastapi import Depends, HTTPException, status
-from .schemas import TokenData, User, UserInDB
+from .schemas import TokenData, User, UserInDB, UserMeals
 import boto3
 from boto3.dynamodb.types import TypeDeserializer
 
@@ -28,7 +28,7 @@ fake_users_db = {
 fake_meals_db = [
     {
         "id": "1",
-        "name": "Spaghetti",
+        "title": "Spaghetti",
         "ingredients": ["Pasta", "Tomato Sauce"],
         "description": "Fresh spaghetti with tomato sauce",
         "imageURL": "https://sugarspunrun.com/wp-content/uploads/2023/09/Spaghetti-Meat-Sauce-1-of-1-3.jpg",
@@ -36,7 +36,7 @@ fake_meals_db = [
     },
     {
         "id": "2",
-        "name": "Lasagna",
+        "title": "Lasagna",
         "ingredients": ["Meat", "Cheese", "Tomato Sauce"],
         "description": "Tasty lasagna with meat sauce",
         "imageURL": "https://www.kitchensanctuary.com/wp-content/uploads/2020/10/Lasagne-square-FS-79.jpg",
@@ -57,6 +57,10 @@ def dynamodb_to_user(user):
         "lastName": user["LastName"],
         "hashed_password": user["HashedPassword"],
     }
+
+
+def dynamodb_to_user_meals(meal):
+    return {"UserId": meal["EntityId"], "Meals": meal["Meals"]}
 
 
 def deserialize_item(item):
@@ -102,7 +106,6 @@ def get_user(username: str):
         Key={"EntityType": {"S": "account"}, "EntityId": {"S": username}},
     )
     serialized_user = response.get("Item")
-    print("serialized_user", serialized_user)
     if serialized_user:
         deserialized_user = deserialize_item(response.get("Item"))
         user = dynamodb_to_user(deserialized_user)
@@ -134,7 +137,14 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     return user
 
 
-def get_current_user_meals(current_user: Annotated[User, Depends(get_current_user)]):
-    print("current_user", current_user)
-    # response = client.
-    # return
+def get_current_user_meals(current_user: User):
+    response = client.get_item(
+        TableName="MainTable",
+        Key={"EntityType": {"S": "account#meals"}, "EntityId": {"S": current_user.id}},
+    )
+    serialized_meals = response.get("Item")
+    if serialized_meals:
+        deserialized_meals = deserialize_item(response.get("Item"))
+        meals = dynamodb_to_user_meals(deserialized_meals)
+        return UserMeals(**meals).model_dump(by_alias=True)
+    return {"meals": [], "userId": current_user.id}

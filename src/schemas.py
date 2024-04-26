@@ -1,4 +1,17 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, AliasGenerator, field_serializer
+from urllib.parse import unquote
+
+
+def to_camel(s):
+    return s[0].lower() + s[1:]
+
+
+model_config = ConfigDict(alias_generator=AliasGenerator(serialization_alias=to_camel))
+
+
+class BaseEntity(BaseModel):
+    model_config = model_config
+
 
 class Token(BaseModel):
     access_token: str
@@ -25,3 +38,29 @@ class Item(BaseModel):
     price: float
 
 
+class Ingredient(BaseEntity):
+    Unit: str
+    Value: str
+    Title: str
+
+
+class IngredientGroup(BaseEntity):
+    GroupName: str | None
+    GroupValues: list[Ingredient]
+
+
+class Meal(BaseEntity):
+    Id: str
+    ImageUrl: str
+    Title: str
+    Price: float
+    Ingredients: list[IngredientGroup]
+
+    @field_serializer("ImageUrl")
+    def serizlize_image_url(self, value):
+        return unquote(value)
+
+
+class UserMeals(BaseEntity):
+    UserId: str
+    Meals: list[Meal]
