@@ -1,53 +1,13 @@
-from datetime import datetime, timedelta, timezone
 from typing import Annotated
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException, status
+from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordBearer
+from .aws import deserialize_item, dynamodb_client
 
-from fastapi import Depends, HTTPException, status
-from .schemas import TokenData, User, UserInDB, UserMeals
-import boto3
-from boto3.dynamodb.types import TypeDeserializer
-
-client = boto3.client("dynamodb")
-
-SECRET_KEY = "c514d86f164e955c01a06db43497aa2a2ce6950b77388259e8bd4916f4134054"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-        "disabled": False,
-    },
-}
-
-fake_meals_db = [
-    {
-        "id": "1",
-        "title": "Spaghetti",
-        "ingredients": ["Pasta", "Tomato Sauce"],
-        "description": "Fresh spaghetti with tomato sauce",
-        "imageURL": "https://sugarspunrun.com/wp-content/uploads/2023/09/Spaghetti-Meat-Sauce-1-of-1-3.jpg",
-        "price": 10.99,
-    },
-    {
-        "id": "2",
-        "title": "Lasagna",
-        "ingredients": ["Meat", "Cheese", "Tomato Sauce"],
-        "description": "Tasty lasagna with meat sauce",
-        "imageURL": "https://www.kitchensanctuary.com/wp-content/uploads/2020/10/Lasagne-square-FS-79.jpg",
-        "price": 13.99,
-    },
-]
-
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 def dynamodb_to_user(user):
     return {
@@ -57,16 +17,6 @@ def dynamodb_to_user(user):
         "lastName": user["LastName"],
         "hashed_password": user["HashedPassword"],
     }
-
-
-def dynamodb_to_user_meals(meal):
-    return {"UserId": meal["EntityId"], "Meals": meal["Meals"]}
-
-
-def deserialize_item(item):
-    item = {k: TypeDeserializer().deserialize(v) for k, v in item.items()}
-    return item
-
 
 def fake_hash_password(password: str):
     return "fakehashed" + password
@@ -101,7 +51,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 def get_user(username: str):
-    response = client.get_item(
+    response = dynamodb_client.get_item(
         TableName="MainTable",
         Key={"EntityType": {"S": "account"}, "EntityId": {"S": username}},
     )
@@ -115,6 +65,7 @@ def get_user(username: str):
 def fake_decode_token(token):
     user = get_user(token)
     return user
+
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
@@ -135,16 +86,3 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     if user is None:
         raise credentials_exception
     return user
-
-
-def get_current_user_meals(current_user: User):
-    response = client.get_item(
-        TableName="MainTable",
-        Key={"EntityType": {"S": "account#meals"}, "EntityId": {"S": current_user.id}},
-    )
-    serialized_meals = response.get("Item")
-    if serialized_meals:
-        deserialized_meals = deserialize_item(response.get("Item"))
-        meals = dynamodb_to_user_meals(deserialized_meals)
-        return UserMeals(**meals).model_dump(by_alias=True)
-    return {"meals": [], "userId": current_user.id}

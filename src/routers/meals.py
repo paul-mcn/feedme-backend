@@ -1,13 +1,13 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
-from ..dependencies import fake_meals_db, oauth2_scheme
+from ..dependencies.user import oauth2_scheme
 
 router = APIRouter()
 
 
 @router.get("")
 async def read_meals(token: Annotated[str, Depends(oauth2_scheme)]):
-    return {"meals": fake_meals_db}
+    return {"meals": [], "uhhh bro": "what the frick"}
 
 
 # @router.get("/{item_id}")

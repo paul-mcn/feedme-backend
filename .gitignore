@@ -50,6 +50,7 @@ coverage.xml
 docs/_build/
 
 # environment
+.env
 .env/
 .venv/
 env/

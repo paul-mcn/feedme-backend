@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict, AliasGenerator, field_serializer
+from pydantic_settings import SettingsConfigDict, BaseSettings
 from urllib.parse import unquote
 
 
@@ -8,6 +9,12 @@ def to_camel(s):
 
 model_config = ConfigDict(alias_generator=AliasGenerator(serialization_alias=to_camel))
 
+
+class EnvironmentSettings(BaseSettings):
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: str
+    model_config = SettingsConfigDict(env_file=".env")
 
 class BaseEntity(BaseModel):
     model_config = model_config

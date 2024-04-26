@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from .routers import meals, auth, users
 
+from .dependencies.env import get_environment_settings
+
+print(get_environment_settings())
+
 
 app = FastAPI()
 

@@ -1,8 +1,8 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
 from ..schemas import User
-from ..dependencies import get_current_user, get_current_user_meals
-
+from ..dependencies.user import get_current_user
+from ..dependencies.meal import get_current_user_meals
 
 router = APIRouter()
 
@@ -17,5 +17,4 @@ async def read_own_meals(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     meals = get_current_user_meals(current_user)
-    print(meals)
     return meals
