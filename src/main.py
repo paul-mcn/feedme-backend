@@ -3,8 +3,8 @@ from .routers import meals, auth, users
 
 from .dependencies.env import get_environment_settings
 
-print(get_environment_settings())
 
+print(get_environment_settings())
 
 app = FastAPI()
 
@@ -15,4 +15,4 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"like": "scoob"}
