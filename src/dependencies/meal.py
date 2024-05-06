@@ -1,9 +1,6 @@
-from .aws import deserialize_item, dynamodb_client, s3_client
-from ..schemas import Meal, User, UserMeals
-
-
-def dynamodb_to_user_meals(meal):
-    return {"UserId": meal["EntityId"], "Meals": meal["Meals"]}
+from .aws import deserialize_item, dynamodb_client, get_main_db_table, serialize_item
+from ..schemas import MealCreate, MealIn, User, UserMeals
+from uuid import uuid4
 
 
 def get_current_user_meals(current_user: User):
@@ -14,23 +11,32 @@ def get_current_user_meals(current_user: User):
     serialized_meals = response.get("Item")
     if serialized_meals:
         deserialized_meals = deserialize_item(response.get("Item"))
-        meals = dynamodb_to_user_meals(deserialized_meals)
-        return UserMeals(**meals).model_dump(by_alias=True)
+        user_meals = UserMeals(
+            userId=deserialized_meals["EntityId"], meals=deserialized_meals["meals"]
+        )
+        return user_meals
     return {"meals": [], "userId": current_user.id}
 
 
-def put_current_user_meal(current_user: User, new_meal: Meal):
-    dynamodb_client.put_item(
+def put_current_user_meal(account_id: str, meal: MealCreate):
+    uuid = uuid4().hex
+    new_meal = MealIn(
+        id=uuid,
+        title=meal.title,
+        ingredients=meal.ingredients,
+        price=meal.price,
+        time=meal.time,
+        description=meal.description,
+        imageURLs=meal.imageURLs,
+    ).model_dump()
+    # print(new_meal)
+    serialized_meal = serialize_item(new_meal)
+    print(serialized_meal)
+    return dynamodb_client.update_item(
         TableName="MainTable",
-        Item={
-            "EntityType": {"S": "account#meals"},
-            "EntityId": {"S": current_user.id},
-            "Meals": {"S": new_meal},
-        },
-    )
-
-    s3_client.put_object(
-        Body=new_meal,
-        Bucket="organisemymeals-image-bucket",
-        Key=f"{current_user.id}/meals.json",
+        Key={"EntityType": {"S": "account#meals"}, "EntityId": {"S": account_id}},
+        UpdateExpression="SET meals = list_append(meals, :new_meal)",
+        # ExpressionAttributeNames={"#meals": "meals"},
+        ExpressionAttributeValues={":new_meal": {"L": [{"M": serialized_meal}]}},
+        ReturnValues="ALL_NEW",
     )

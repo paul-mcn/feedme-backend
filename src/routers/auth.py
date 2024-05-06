@@ -1,4 +1,3 @@
-
 from datetime import timedelta
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -9,13 +8,9 @@ from ..schemas import Token
 from ..dependencies.env import get_environment_settings
 
 
-router = APIRouter(
-    responses={404: {"description": "Not found"}}
-)
+router = APIRouter(responses={404: {"description": "Not found"}})
 
 env_settings = get_environment_settings()
-
-print(env_settings)
 
 
 @router.post("/token")
@@ -34,4 +29,3 @@ async def login_for_access_token(
         data={"sub": user.id}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
-

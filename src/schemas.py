@@ -1,6 +1,10 @@
+from decimal import Decimal
+from typing import Optional
 from pydantic import BaseModel, ConfigDict, AliasGenerator, field_serializer
-from pydantic_settings import SettingsConfigDict, BaseSettings
-from urllib.parse import unquote
+from .dependencies.aws import s3_client
+from .dependencies.env import get_environment_settings
+
+settings = get_environment_settings()
 
 
 def to_camel(s):
@@ -9,12 +13,6 @@ def to_camel(s):
 
 model_config = ConfigDict(alias_generator=AliasGenerator(serialization_alias=to_camel))
 
-
-class EnvironmentSettings(BaseSettings):
-    SECRET_KEY: str
-    ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-    model_config = SettingsConfigDict(env_file=".env")
 
 class BaseEntity(BaseModel):
     model_config = model_config
@@ -27,6 +25,10 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+
+class ImageURL(BaseEntity):
+    id: str
 
 
 class User(BaseModel):
@@ -42,32 +44,53 @@ class UserInDB(User):
 
 class Item(BaseModel):
     name: str
-    price: float
+    price: Decimal
 
 
 class Ingredient(BaseEntity):
-    Unit: str
-    Value: str
-    Title: str
+    unit: str | None
+    value: str
+    title: str | None
 
 
 class IngredientGroup(BaseEntity):
-    GroupName: str | None
-    GroupValues: list[Ingredient]
+    groupName: str | None
+    groupValues: list[Ingredient]
 
 
-class Meal(BaseEntity):
-    Id: str
-    ImageUrl: str
-    Title: str
-    Price: float
-    Ingredients: list[IngredientGroup]
+class MealIn(BaseEntity):
+    id: str
+    title: str
+    price: Decimal | None
+    ingredients: str | None
+    time: Optional[int] = None
+    description: Optional[str] = None
+    imageURLs: list[ImageURL]
 
-    @field_serializer("ImageUrl")
-    def serizlize_image_url(self, value):
-        return unquote(value)
 
+class MealOut(MealIn):
+    @field_serializer("imageURLs", check_fields=False)
+    def serizlize_image_url(self, imageURLs: list[ImageURL]):
+        for imageURL in imageURLs:
+            try:
+                imageURL.id = s3_client.generate_presigned_url(
+                    "get_object",
+                    Params={"Bucket": settings.AWS_BUCKET_NAME, "Key": imageURL.id},
+                )
+            except Exception as e:
+                print(e)
+                imageURL.id = ""
+
+        return imageURLs
+
+class MealCreate(BaseEntity):
+    title: str
+    price: Decimal | None
+    ingredients: str | None
+    time: Optional[int] = None
+    description: Optional[str] = None
+    imageURLs: list[ImageURL]
 
 class UserMeals(BaseEntity):
-    UserId: str
-    Meals: list[Meal]
+    userId: str
+    meals: list[MealOut]
