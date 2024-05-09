@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, AliasGenerator, field_serializer
+from uuid import uuid4
+from pydantic import BaseModel, ConfigDict, AliasGenerator, Field, field_serializer
 from .dependencies.aws import s3_client
 from .dependencies.env import get_environment_settings
 
@@ -39,7 +40,9 @@ class User(BaseModel):
 
 
 class UserInDB(User):
-    hashed_password: str
+    # fields from aws dynamodb
+    id: str = Field(validation_alias="EntityId")
+    hashed_password: str = Field(validation_alias="hashedPassword")
 
 
 class Item(BaseModel):
@@ -58,8 +61,7 @@ class IngredientGroup(BaseEntity):
     groupValues: list[Ingredient]
 
 
-class MealIn(BaseEntity):
-    id: str
+class MealBase(BaseEntity):
     title: str
     price: Decimal | None
     ingredients: str | None
@@ -68,7 +70,13 @@ class MealIn(BaseEntity):
     imageURLs: list[ImageURL]
 
 
-class MealOut(MealIn):
+class MealIn(MealBase):
+    mealId: str = Field(default_factory=lambda: uuid4().hex)
+
+
+class MealOut(MealBase):
+    id: str = Field(validation_alias="mealId")
+
     @field_serializer("imageURLs", check_fields=False)
     def serizlize_image_url(self, imageURLs: list[ImageURL]):
         for imageURL in imageURLs:
@@ -83,6 +91,7 @@ class MealOut(MealIn):
 
         return imageURLs
 
+
 class MealCreate(BaseEntity):
     title: str
     price: Decimal | None
@@ -91,6 +100,11 @@ class MealCreate(BaseEntity):
     description: Optional[str] = None
     imageURLs: list[ImageURL]
 
+
 class UserMeals(BaseEntity):
     userId: str
     meals: list[MealOut]
+
+class UserMealRecommendations(BaseEntity):
+    userId: str
+    mealRecommendations: list[MealOut]
