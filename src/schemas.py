@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import date
 from typing import Optional
 from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, AliasGenerator, Field, field_serializer
@@ -105,6 +106,10 @@ class UserMeals(BaseEntity):
     userId: str
     meals: list[MealOut]
 
+class MealRecommendation(BaseEntity):
+    meal: MealOut
+    date: date
+
 class UserMealRecommendations(BaseEntity):
     userId: str
-    mealRecommendations: list[MealOut]
+    mealRecommendations: list[MealRecommendation]

@@ -1,17 +1,29 @@
+from datetime import date, datetime, timedelta
 import random
 from .aws import deserialize_item, dynamodb_client, serialize_item
-from ..schemas import MealCreate, MealIn, MealOut, UserMealRecommendations, UserMeals
+from ..schemas import (
+    MealCreate,
+    MealIn,
+    MealOut,
+    UserMealRecommendations,
+    UserMeals,
+    MealRecommendation,
+)
 
 
-def create_meal_recommendations(meals: list):
-    randomly_selected_meals = random.sample(meals, 3)
+def create_meal_recommendations(meals: list, count: int):
+    randomly_selected_meals = random.sample(meals, min(count, 7))
     return randomly_selected_meals
+
+
+def create_week_dates(count: int):
+    week_dates = [date.today() + timedelta(days=x) for x in range(count)]
+    return week_dates
 
 
 def get_meal_recommendations(current_user_id: str):
     response = dynamodb_client.query(
         TableName="MainTable",
-        IndexName="EntityType-title-index",
         KeyConditionExpression="EntityType = :entityType AND begins_with(EntityId, :entityId)",
         ExpressionAttributeValues={
             ":entityType": {"S": "account#meals"},
@@ -22,11 +34,17 @@ def get_meal_recommendations(current_user_id: str):
     count = response.get("Count")
     if count == 0:
         return {"mealRecommendations": [], "userId": current_user_id}
-    randomly_selected_meals = create_meal_recommendations(serialized_meals)
+    # this happens before deserialization to save on processing time
+    randomly_selected_meals = create_meal_recommendations(serialized_meals, count)
+    week_dates = create_week_dates(count)
+    print(week_dates)
     deserialized_meals = [
-        MealOut(**deserialize_item(meal)) for meal in randomly_selected_meals
+        MealRecommendation(meal=MealOut(**deserialize_item(meal)), date=date.today())
+        for meal in randomly_selected_meals
     ]
-    user_meals = UserMealRecommendations(userId=current_user_id, mealRecommendations=deserialized_meals)
+    user_meals = UserMealRecommendations(
+        userId=current_user_id, mealRecommendations=deserialized_meals
+    )
     return user_meals
 
 
