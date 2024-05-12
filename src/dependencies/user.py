@@ -67,7 +67,7 @@ def create_user(email: str, password: str):
 
 
 def get_user_by_email(email: str):
-    response = dynamodb_client.query(
+    return dynamodb_client.query(
         TableName="MainTable",
         IndexName="EntityType-email-index",
         KeyConditionExpression="EntityType = :entityType AND email = :email",
