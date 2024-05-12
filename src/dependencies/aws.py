@@ -19,10 +19,10 @@ cors_configuration = {
 dynamodb_client = boto3.client("dynamodb")
 s3_client = boto3.client("s3")
 
-s3_client.put_bucket_cors(
-    Bucket=settings.AWS_BUCKET_NAME,
-    CORSConfiguration=cors_configuration,
-)
+# s3_client.put_bucket_cors(
+#     Bucket=settings.AWS_BUCKET_NAME,
+#     CORSConfiguration=cors_configuration,
+# )
 
 def get_dynamodb_client():
     return dynamodb_client
