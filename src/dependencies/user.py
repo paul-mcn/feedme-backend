@@ -80,7 +80,7 @@ def get_user_by_email(email: str):
         return response
     except botocore.exceptions.ClientError as e:
         error_message = f"An error occurred: {e.response['Error']['Message']}"
-        return get_environment_settings()
+        return error_message
   
 
 
