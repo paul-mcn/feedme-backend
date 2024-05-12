@@ -87,7 +87,6 @@ class MealOut(MealBase):
                     Params={"Bucket": settings.AWS_BUCKET_NAME, "Key": imageURL.id},
                 )
             except Exception as e:
-                print(e)
                 imageURL.id = ""
 
         return imageURLs

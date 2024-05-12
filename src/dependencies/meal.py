@@ -80,10 +80,7 @@ def create_current_user_meal(current_user_id: str, meal: MealCreate):
         description=meal.description,
         imageURLs=meal.imageURLs,
     ).model_dump()
-
     serialized_meal = serialize_item(new_meal)
-    print(serialized_meal)
-
     return dynamodb_client.put_item(
         TableName="MainTable",
         Item={
@@ -103,14 +100,11 @@ def put_current_user_meal(account_id: str, meal: MealCreate):
         description=meal.description,
         imageURLs=meal.imageURLs,
     ).model_dump()
-    # print(new_meal)
     serialized_meal = serialize_item(new_meal)
-    print(serialized_meal)
     return dynamodb_client.update_item(
         TableName="MainTable",
         Key={"EntityType": {"S": "account#meals"}, "EntityId": {"S": account_id}},
         UpdateExpression="SET meals = list_append(meals, :new_meal)",
-        # ExpressionAttributeNames={"#meals": "meals"},
         ExpressionAttributeValues={":new_meal": {"L": [{"M": serialized_meal}]}},
         ReturnValues="ALL_NEW",
     )

@@ -100,7 +100,6 @@ def get_user_by_email(email: str):
     if serialized_user:
         deserialized_user = deserialize_item(serialized_user)
         user = UserInDB(**deserialized_user)
-        print(user)
         return user
 
 
