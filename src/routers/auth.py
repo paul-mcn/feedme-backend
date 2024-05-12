@@ -39,7 +39,7 @@ async def login_for_access_token(
 @router.post("/register")
 async def register(email: Annotated[str, Form()], password: Annotated[str, Form()]):
     user = get_user_by_email(email)
-    # return user
+    return user
     if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
