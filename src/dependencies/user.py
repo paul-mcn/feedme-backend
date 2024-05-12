@@ -81,7 +81,7 @@ def get_user_by_email(email: str):
         return response
     except botocore.exceptions.ClientError as e:
         error_message = f"An error occurred: {e.response['Error']['Message']}"
-        return error_message
+        return get_environment_settings()
     serialized_users = response.get("Items")
     count = response.get("Count")
     serialized_user = serialized_users[0] if count > 0 else None
