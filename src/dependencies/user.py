@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
+import botocore.exceptions
 
 from ..dependencies.env import get_environment_settings
 from .aws import deserialize_item, dynamodb_client
@@ -67,15 +68,20 @@ def create_user(email: str, password: str):
 
 
 def get_user_by_email(email: str):
-    return dynamodb_client.query(
-        TableName="MainTable",
-        IndexName="EntityType-email-index",
-        KeyConditionExpression="EntityType = :entityType AND email = :email",
-        ExpressionAttributeValues={
-            ":entityType": {"S": "account"},
-            ":email": {"S": email},
-        },
-    )
+    try:
+        response = dynamodb_client.query(
+            TableName="MainTable",
+            IndexName="EntityType-email-index",
+            KeyConditionExpression="EntityType = :entityType AND email = :email",
+            ExpressionAttributeValues={
+                ":entityType": {"S": "account"},
+                ":email": {"S": email},
+            },
+        )
+        return response
+    except botocore.exceptions.ClientError as e:
+        error_message = f"An error occurred: {e.response['Error']['Message']}"
+        return error_message
     serialized_users = response.get("Items")
     count = response.get("Count")
     serialized_user = serialized_users[0] if count > 0 else None

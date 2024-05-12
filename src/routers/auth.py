@@ -38,7 +38,6 @@ async def login_for_access_token(
 
 @router.post("/register")
 async def register(email: Annotated[str, Form()], password: Annotated[str, Form()]):
-    return {"email": email, "password": password}
     user = get_user_by_email(email)
     return user
     if user:
