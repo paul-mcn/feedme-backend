@@ -47,8 +47,17 @@ async def register(email: Annotated[str, Form()], password: Annotated[str, Form(
         )
     try:
         new_user = create_user(email, password)
-    except Exception as e:
-        raise e
+    except Exception as err:
+        import logging
+
+        logging.basicConfig(
+            filename="/tmp/myapp.log",
+            level=logging.DEBUG,
+            format="%(asctime)s %(levelname)s %(name)s %(message)s",
+        )
+        logger = logging.getLogger(__name__)
+
+        logger.error(err)
         raise HTTPException(
             status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="Something went wrong",
