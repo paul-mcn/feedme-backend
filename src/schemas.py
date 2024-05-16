@@ -65,10 +65,11 @@ class IngredientGroup(BaseEntity):
 class MealBase(BaseEntity):
     title: str
     price: Decimal | None
-    ingredients: str | None
+    ingredients: str | list[IngredientGroup] | None
     time: Optional[int] = None
     description: Optional[str] = None
     imageURLs: list[ImageURL]
+    snapshotURL: str | None = None
 
 
 class MealIn(MealBase):
@@ -99,16 +100,28 @@ class MealCreate(BaseEntity):
     time: Optional[int] = None
     description: Optional[str] = None
     imageURLs: list[ImageURL]
+    snapshotURL: str | None = None
 
 
 class UserMeals(BaseEntity):
     userId: str
     meals: list[MealOut]
 
+
 class MealRecommendation(BaseEntity):
     meal: MealOut
     date: date
 
+
 class UserMealRecommendations(BaseEntity):
     userId: str
     mealRecommendations: list[MealRecommendation]
+
+
+class MealSnapshotRequestBody(BaseModel):
+    url: str
+
+
+class MealSnapshot(MealOut):
+    id: str = Field(validation_alias="EntityId")
+    mealId: str = Field(validation_alias="EntityId")

@@ -2,9 +2,11 @@ from datetime import date, datetime, timedelta
 import random
 from .aws import deserialize_item, dynamodb_client, serialize_item
 from ..schemas import (
+    MealBase,
     MealCreate,
     MealIn,
     MealOut,
+    MealSnapshot,
     UserMealRecommendations,
     UserMeals,
     MealRecommendation,
@@ -19,6 +21,20 @@ def create_meal_recommendations(meals: list, count: int):
 def create_week_dates(count: int):
     week_dates = [date.today() + timedelta(days=x) for x in range(count)]
     return week_dates
+
+
+def get_meal_snapshot(encodedUrl: str):
+    response = dynamodb_client.get_item(
+        TableName="MainTable",
+        Key={
+            "EntityType": {"S": "meal#web-page-snapshot"},
+            "EntityId": {"S": encodedUrl},
+        },
+    )
+    serialized_meal = response.get("Item")
+    if serialized_meal:
+        deserialized_meal = deserialize_item(serialized_meal)
+        return MealSnapshot(**deserialized_meal)
 
 
 def get_meal_recommendations(current_user_id: str):
@@ -68,10 +84,7 @@ def get_current_user_meals(current_user_id: str):
     return user_meals
 
 
-def create_current_user_meal(current_user_id: str, meal: MealCreate):
-
-    # TODO: web scrape url to get ingredients, title, and other info
-    # for automatic form filling
+def create_current_user_meal(current_user_id: str, meal: MealBase):
     new_meal = MealIn(
         title=meal.title,
         ingredients=meal.ingredients,
@@ -79,6 +92,7 @@ def create_current_user_meal(current_user_id: str, meal: MealCreate):
         time=meal.time,
         description=meal.description,
         imageURLs=meal.imageURLs,
+        snapshotURL=meal.snapshotURL,
     ).model_dump()
     serialized_meal = serialize_item(new_meal)
     return dynamodb_client.put_item(
@@ -88,23 +102,4 @@ def create_current_user_meal(current_user_id: str, meal: MealCreate):
             "EntityId": {"S": f"{current_user_id}#{new_meal['mealId']}"},
             **serialized_meal,
         },
-    )
-
-
-def put_current_user_meal(account_id: str, meal: MealCreate):
-    new_meal = MealIn(
-        title=meal.title,
-        ingredients=meal.ingredients,
-        price=meal.price,
-        time=meal.time,
-        description=meal.description,
-        imageURLs=meal.imageURLs,
-    ).model_dump()
-    serialized_meal = serialize_item(new_meal)
-    return dynamodb_client.update_item(
-        TableName="MainTable",
-        Key={"EntityType": {"S": "account#meals"}, "EntityId": {"S": account_id}},
-        UpdateExpression="SET meals = list_append(meals, :new_meal)",
-        ExpressionAttributeValues={":new_meal": {"L": [{"M": serialized_meal}]}},
-        ReturnValues="ALL_NEW",
     )

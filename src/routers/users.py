@@ -1,10 +1,13 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends
-from ..schemas import MealCreate, User
+from fastapi import APIRouter, Depends, Form
+from fastapi.datastructures import URL
+from urllib.parse import quote, unquote
+from ..schemas import MealCreate, User, MealSnapshotRequestBody
 from ..dependencies.user import get_current_user
 from ..dependencies.meal import (
     create_current_user_meal,
     get_current_user_meals,
+    get_meal_snapshot,
     get_meal_recommendations,
 )
 
@@ -42,3 +45,18 @@ async def create_own_meal(
 
     response = create_current_user_meal(current_user.id, meal)
     return response
+
+
+@router.post("/me/meals/snapshot")
+async def upsert_meal_snapshot(
+    url: MealSnapshotRequestBody, current_user: Annotated[User, Depends(get_current_user)]
+):
+    snapshotUrl = quote(url.url)
+    meal = get_meal_snapshot(snapshotUrl)
+    if meal is None:
+        return {"meal": None}
+
+    # TODO: web scrape url to get ingredients, title, and other info
+    # for automatic form filling
+
+    return {"meal": meal}
