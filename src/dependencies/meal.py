@@ -84,7 +84,7 @@ def get_current_user_meals(current_user_id: str):
     return user_meals
 
 
-def create_current_user_meal(current_user_id: str, meal: MealBase):
+def create_current_user_meal(current_user_id: str, meal: MealCreate):
     new_meal = MealIn(
         title=meal.title,
         ingredients=meal.ingredients,
