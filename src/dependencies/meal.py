@@ -53,11 +53,14 @@ def get_meal_recommendations(current_user_id: str):
     # this happens before deserialization to save on processing time
     randomly_selected_meals = create_meal_recommendations(serialized_meals, count)
     week_dates = create_week_dates(count)
-    print(week_dates)
-    deserialized_meals = [
-        MealRecommendation(meal=MealOut(**deserialize_item(meal)), date=date.today())
-        for meal in randomly_selected_meals
-    ]
+    deserialized_meals = []
+    for idx, meal in enumerate(randomly_selected_meals):
+        deserialized_meals.append(
+            MealRecommendation(
+                meal=MealOut(**deserialize_item(meal)), date=week_dates[idx]
+            )
+        )
+
     user_meals = UserMealRecommendations(
         userId=current_user_id, mealRecommendations=deserialized_meals
     )
