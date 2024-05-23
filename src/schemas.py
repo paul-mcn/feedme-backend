@@ -108,14 +108,20 @@ class UserMeals(BaseEntity):
     meals: list[MealOut]
 
 
+class MealRecommendationInDB(BaseEntity):
+    meal: MealIn
+    date: str
+
+
 class MealRecommendation(BaseEntity):
     meal: MealOut
-    date: date
+    date: date 
 
 
 class UserMealRecommendations(BaseEntity):
     userId: str
     mealRecommendations: list[MealRecommendation]
+    expirationDate: date
 
 
 class MealSnapshotRequestBody(BaseModel):
@@ -125,3 +131,4 @@ class MealSnapshotRequestBody(BaseModel):
 class MealSnapshot(MealOut):
     id: str = Field(validation_alias="EntityId")
     mealId: str = Field(validation_alias="EntityId")
+

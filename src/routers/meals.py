@@ -1,5 +1,14 @@
+from datetime import date
+import json
 from typing import Annotated
 from fastapi import APIRouter, Depends
+
+from ..dependencies.dates import get_start_of_week
+from ..dependencies.meal_recommendations import (
+    create_recommended_meals,
+    get_recommended_meals,
+    is_recommendation_expired,
+)
 from ..schemas import MealCreate, User, MealSnapshotRequestBody
 from urllib.parse import quote
 from ..dependencies.user import get_current_user
@@ -7,7 +16,6 @@ from ..dependencies.meal import (
     create_current_user_meal,
     get_current_user_meals,
     get_meal_snapshot,
-    get_meal_recommendations,
 )
 
 router = APIRouter()
@@ -24,9 +32,22 @@ async def read_own_meals(
 @router.get("/recommendations")
 async def read_own_meal_recommendations(
     current_user: Annotated[User, Depends(get_current_user)],
+    week_start_date: date | None = None,
 ):
-    meals = get_meal_recommendations(current_user.id)
-    return meals
+    # if there is no date supplied then we just get the most recent entry
+    week_start_date = get_start_of_week(week_start_date)
+    recommendations = get_recommended_meals(current_user.id, week_start_date)
+    return recommendations
+
+
+@router.post("/create-recommendations")
+async def create_own_meal_recommendations(
+    current_user: Annotated[User, Depends(get_current_user)],
+    week_start_date: date | None = None,
+):
+    # if there is no date supplied then we just get the most recent entry
+    recommendations = create_recommended_meals(current_user.id, week_start_date)
+    return recommendations
 
 
 @router.post("/add")

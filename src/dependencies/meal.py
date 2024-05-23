@@ -1,26 +1,12 @@
-from datetime import date, datetime, timedelta
-import random
 from .aws import deserialize_item, dynamodb_client, serialize_item
+from ..types import DynamoDBQueryResponse
 from ..schemas import (
-    MealBase,
     MealCreate,
     MealIn,
     MealOut,
     MealSnapshot,
-    UserMealRecommendations,
     UserMeals,
-    MealRecommendation,
 )
-
-
-def create_meal_recommendations(meals: list, count: int):
-    randomly_selected_meals = random.sample(meals, min(count, 7))
-    return randomly_selected_meals
-
-
-def create_week_dates(count: int):
-    week_dates = [date.today() + timedelta(days=x) for x in range(count)]
-    return week_dates
 
 
 def get_meal_snapshot(encodedUrl: str):
@@ -37,7 +23,7 @@ def get_meal_snapshot(encodedUrl: str):
         return MealSnapshot(**deserialized_meal)
 
 
-def get_meal_recommendations(current_user_id: str):
+def get_raw_current_user_meals(current_user_id: str) -> DynamoDBQueryResponse:
     response = dynamodb_client.query(
         TableName="MainTable",
         KeyConditionExpression="EntityType = :entityType AND begins_with(EntityId, :entityId)",
@@ -46,40 +32,15 @@ def get_meal_recommendations(current_user_id: str):
             ":entityId": {"S": current_user_id},
         },
     )
-    serialized_meals = response.get("Items")
-    count = response.get("Count")
-    if count == 0:
-        return {"mealRecommendations": [], "userId": current_user_id}
-    # this happens before deserialization to save on processing time
-    randomly_selected_meals = create_meal_recommendations(serialized_meals, count)
-    week_dates = create_week_dates(count)
-    deserialized_meals = []
-    for idx, meal in enumerate(randomly_selected_meals):
-        deserialized_meals.append(
-            MealRecommendation(
-                meal=MealOut(**deserialize_item(meal)), date=week_dates[idx]
-            )
-        )
-
-    user_meals = UserMealRecommendations(
-        userId=current_user_id, mealRecommendations=deserialized_meals
-    )
-    return user_meals
+    return response
 
 
 def get_current_user_meals(current_user_id: str):
-    response = dynamodb_client.query(
-        TableName="MainTable",
-        KeyConditionExpression="EntityType = :entityType AND begins_with(EntityId, :entityId)",
-        ExpressionAttributeValues={
-            ":entityType": {"S": "account#meals"},
-            ":entityId": {"S": current_user_id},
-        },
-    )
+    response = get_raw_current_user_meals(current_user_id)
     serialized_meals = response.get("Items")
     count = response.get("Count")
     if count == 0:
-        return {"meals": [], "userId": current_user_id}
+        return UserMeals(userId=current_user_id, meals=[])
     deserialized_meals = [
         MealOut(**deserialize_item(meal)) for meal in serialized_meals
     ]

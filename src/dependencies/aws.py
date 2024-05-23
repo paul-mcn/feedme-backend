@@ -42,9 +42,19 @@ def get_s3_client():
     return s3_client
 
 
-def deserialize_item(item):
+def deserialize_list(items: list[dict]):
+    items = [TypeDeserializer().deserialize(item) for item in items]
+    return items
+
+
+def deserialize_item(item: dict):
     item = {k: TypeDeserializer().deserialize(v) for k, v in item.items()}
     return item
+
+
+def serialize_list(items: list[dict]):
+    items = [TypeSerializer().serialize(item) for item in items]
+    return items
 
 
 def serialize_item(item):
