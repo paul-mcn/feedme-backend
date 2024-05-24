@@ -57,6 +57,7 @@ def create_current_user_meal(current_user_id: str, meal: MealCreate):
         description=meal.description,
         imageURLs=meal.imageURLs,
         snapshotURL=meal.snapshotURL,
+        notes=meal.notes
     ).model_dump()
     serialized_meal = serialize_item(new_meal)
     return dynamodb_client.put_item(

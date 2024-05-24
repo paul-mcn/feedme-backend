@@ -51,10 +51,10 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-def create_user(email: str, password: str):
+def put_user(email: str, password: str):
     id = uuid.uuid4().hex
     hashed_password = get_password_hash(password)
-    return dynamodb_client.put_item(
+    dynamodb_client.put_item(
         TableName="MainTable",
         Item={
             "EntityType": {"S": "account"},
@@ -64,7 +64,10 @@ def create_user(email: str, password: str):
             "lastName": {"NULL": True},
             "hashedPassword": {"S": hashed_password},
         },
+        ConditionExpression="attribute_not_exists(EntityId)",
     )
+    return id
+
 
 # def get_user_by_email(email: str):
 #     try:
@@ -81,7 +84,6 @@ def create_user(email: str, password: str):
 #     except botocore.exceptions.ClientError as e:
 #         error_message = f"An error occurred: {e.response['Error']['Message']}"
 #         return error_message
-  
 
 
 def get_user_by_email(email: str):
@@ -103,10 +105,10 @@ def get_user_by_email(email: str):
         return user
 
 
-def get_user(email: str):
+def get_user_by_id(id: str):
     response = dynamodb_client.get_item(
         TableName="MainTable",
-        Key={"EntityType": {"S": "account"}, "EntityId": {"S": email}},
+        Key={"EntityType": {"S": "account"}, "EntityId": {"S": id}},
     )
     serialized_user = response.get("Item")
     if serialized_user:
@@ -124,13 +126,13 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         payload = jwt.decode(
             token, env_settings.SECRET_KEY, algorithms=[env_settings.ALGORITHM]
         )
-        username: str = payload.get("sub")
+        username: str | None = payload.get("sub")
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(email=token_data.username)
+    user = get_user_by_id(id=token_data.username)
     if user is None:
         raise credentials_exception
     return user

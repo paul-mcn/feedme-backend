@@ -56,17 +56,12 @@ def create_week_dates(count: int, from_date: date):
 
 
 def create_recommended_meals(
-    current_user_id: str, week_start_date: Optional[date] = None
+    current_user_id: str, meals: list[MealIn], week_start_date: Optional[date] = None
 ):
     start_date = week_start_date if week_start_date else date.today()
     start_date = get_start_of_week(start_date)
     week_dates = create_week_dates(7, start_date)
-    response = get_raw_current_user_meals(current_user_id)
-    if response.get("Count") == 0:
-        raise ValueError("No meals found")
-    serialized_meals = response.get("Items")
-    deserialized_meals = [MealIn(**deserialize_item(meal)) for meal in serialized_meals]
-    recommended_meals = randomly_select_meals(deserialized_meals, 7)
+    recommended_meals = randomly_select_meals(meals, 7)
     for idx, meal in enumerate(recommended_meals):
         recommended_meals[idx] = MealRecommendationInDB(
             meal=meal,

@@ -70,6 +70,7 @@ class MealBase(BaseEntity):
     description: Optional[str] = None
     imageURLs: list[ImageURL]
     snapshotURL: str | None = None
+    notes: str | None = None
 
 
 class MealIn(MealBase):
@@ -101,6 +102,7 @@ class MealCreate(BaseEntity):
     description: Optional[str] = None
     imageURLs: list[ImageURL]
     snapshotURL: str | None = None
+    notes: str | None = None
 
 
 class UserMeals(BaseEntity):
@@ -115,7 +117,7 @@ class MealRecommendationInDB(BaseEntity):
 
 class MealRecommendation(BaseEntity):
     meal: MealOut
-    date: date 
+    date: date
 
 
 class UserMealRecommendations(BaseEntity):
@@ -131,4 +133,3 @@ class MealSnapshotRequestBody(BaseModel):
 class MealSnapshot(MealOut):
     id: str = Field(validation_alias="EntityId")
     mealId: str = Field(validation_alias="EntityId")
-

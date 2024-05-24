@@ -1,21 +1,22 @@
 from datetime import date
-import json
 from typing import Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+
+from src.dependencies.aws import deserialize_item
 
 from ..dependencies.dates import get_start_of_week
 from ..dependencies.meal_recommendations import (
     create_recommended_meals,
     get_recommended_meals,
-    is_recommendation_expired,
 )
-from ..schemas import MealCreate, User, MealSnapshotRequestBody
+from ..schemas import MealCreate, MealIn, User, MealSnapshotRequestBody
 from urllib.parse import quote
 from ..dependencies.user import get_current_user
 from ..dependencies.meal import (
     create_current_user_meal,
     get_current_user_meals,
     get_meal_snapshot,
+    get_raw_current_user_meals,
 )
 
 router = APIRouter()
@@ -45,8 +46,16 @@ async def create_own_meal_recommendations(
     current_user: Annotated[User, Depends(get_current_user)],
     week_start_date: date | None = None,
 ):
-    # if there is no date supplied then we just get the most recent entry
-    recommendations = create_recommended_meals(current_user.id, week_start_date)
+    response = get_raw_current_user_meals(current_user.id)
+    if response.get("Count") < 7:
+        raise HTTPException(
+            status_code=409, detail="Not enough meals to create recommendations"
+        )
+    serialized_meals = response.get("Items")
+    deserialized_meals = [MealIn(**deserialize_item(meal)) for meal in serialized_meals]
+    recommendations = create_recommended_meals(
+        current_user.id, deserialized_meals, week_start_date
+    )
     return recommendations
 
 

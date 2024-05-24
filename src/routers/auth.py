@@ -5,8 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from ..dependencies.user import (
     authenticate_user,
     create_access_token,
-    get_user,
-    create_user,
+    put_user,
     get_user_by_email,
 )
 from ..schemas import Token
@@ -47,11 +46,16 @@ async def register(email: Annotated[str, Form()], password: Annotated[str, Form(
             headers={"WWW-Authenticate": "Bearer"},
         )
     try:
-        new_user = create_user(email, password)
+        user_id = put_user(email, password)
     except Exception as err:
         raise HTTPException(
             status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="Something went wrong",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return new_user
+
+    access_token_expires = timedelta(minutes=env_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user_id}, expires_delta=access_token_expires
+    )
+    return Token(access_token=access_token, token_type="bearer")
