@@ -40,7 +40,6 @@ async def setup_account(current_user: Annotated[User, Depends(get_current_user)]
                     "default_meals",
                     image.get("filename"),
                 )
-                print(image_path)
                 image_id = upload_image_from_path(image_path)
                 imageURLs.append({"id": image_id})
             except Exception as e:
