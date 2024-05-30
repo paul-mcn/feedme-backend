@@ -18,16 +18,48 @@ cors_configuration = {
 
 dynamodb_client = boto3.client(
     "dynamodb",
+    endpoint_url=settings.APP_ENV == "development" and "http://localhost:8000" or None,
 )
 
-s3_client = boto3.client(
-    "s3",
-)
+s3_client = boto3.client("s3")
 
 # s3_client.put_bucket_cors(
 #     Bucket=settings.AWS_BUCKET_NAME,
 #     CORSConfiguration=cors_configuration,
 # )
+
+
+def init_db():
+    try:
+        dynamodb_client.create_table(
+            TableName="MainTable",
+            AttributeDefinitions=[
+                {"AttributeName": "EntityType", "AttributeType": "S"},
+                {"AttributeName": "EntityId", "AttributeType": "S"},
+                {"AttributeName": "email", "AttributeType": "S"},
+            ],
+            KeySchema=[
+                {"AttributeName": "EntityType", "KeyType": "HASH"},
+                {"AttributeName": "EntityId", "KeyType": "RANGE"},
+            ],
+            ProvisionedThroughput={"ReadCapacityUnits": 1, "WriteCapacityUnits": 1},
+            GlobalSecondaryIndexes=[
+                {
+                    "IndexName": "EntityType-email-index",
+                    "KeySchema": [
+                        {"AttributeName": "EntityType", "KeyType": "HASH"},
+                        {"AttributeName": "email", "KeyType": "RANGE"},
+                    ],
+                    "Projection": {"ProjectionType": "ALL"},
+                    "ProvisionedThroughput": {
+                        "ReadCapacityUnits": 1,
+                        "WriteCapacityUnits": 1,
+                    },
+                }
+            ],
+        )
+    except Exception as e:
+        print("Couldn't create table. Here's why: %s: %s" % (type(e).__name__, e))
 
 
 def get_dynamodb_client():
