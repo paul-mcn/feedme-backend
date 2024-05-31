@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-from .routers import meals, auth, users, file
-from .dependencies.aws import init_db
+from .routers import auth, users, file
+from .dependencies.aws import init_db, init_s3
 
 init_db()
+init_s3()
 
 
 app = FastAPI()

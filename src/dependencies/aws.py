@@ -11,6 +11,7 @@ cors_configuration = {
             "AllowedHeaders": ["*"],
             "AllowedMethods": ["PUT", "POST", "GET", "DELETE"],
             "AllowedOrigins": ["*"],
+            "ExposeHeaders": ["ETag"],
         }
     ]
 }
@@ -23,10 +24,19 @@ dynamodb_client = boto3.client(
 
 s3_client = boto3.client("s3")
 
-# s3_client.put_bucket_cors(
-#     Bucket=settings.AWS_BUCKET_NAME,
-#     CORSConfiguration=cors_configuration,
-# )
+
+def init_s3():
+    try:
+        s3_client.create_bucket(
+            Bucket=settings.AWS_BUCKET_NAME,
+            CreateBucketConfiguration={"LocationConstraint": "ap-southeast-2"},
+        )
+        s3_client.put_bucket_cors(
+            Bucket=settings.AWS_BUCKET_NAME,
+            CORSConfiguration=cors_configuration,
+        )
+    except Exception as e:
+        print("Couldn't create bucket. Here's why: %s: %s" % (type(e).__name__, e))
 
 
 def init_db():

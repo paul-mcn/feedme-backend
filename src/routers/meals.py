@@ -46,7 +46,7 @@ async def create_own_meal_recommendations(
     current_user: Annotated[User, Depends(get_current_user)],
     week_start_date: date | None = None,
 ):
-    response = get_raw_current_user_meals(current_user.id)
+    response = get_raw_current_user_meals(current_user.id, limit=7)
     if response.get("Count") < 7:
         raise HTTPException(
             status_code=409, detail="Not enough meals to create recommendations"

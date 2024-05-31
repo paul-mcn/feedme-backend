@@ -1,8 +1,8 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pathlib import Path
 from src.dependencies.file import upload_image_from_path
-from src.dependencies.meal import create_current_user_meal
+from src.dependencies.meal import create_current_user_meal, get_current_user_meals
 from src.dependencies.env import get_environment_settings
 from ..schemas import MealCreate, User
 from ..dependencies.user import get_current_user
@@ -26,8 +26,11 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]
     )
 
 
-@router.get("/me/setup-account")
+@router.post("/me/setup-account")
 async def setup_account(current_user: Annotated[User, Depends(get_current_user)]):
+    user_meals = get_current_user_meals(current_user.id, limit=1)
+    if len(user_meals.meals) > 0:
+        return current_user
     for meal in meals:
         imageURLs = []
         for image in meal.get("imageURLs") or []:
@@ -44,7 +47,6 @@ async def setup_account(current_user: Annotated[User, Depends(get_current_user)]
                 imageURLs.append({"id": image_id})
             except Exception as e:
                 raise e
-        print(imageURLs)
         created_meal = MealCreate(
             title=meal.get("title") or "",
             ingredients=meal.get("ingredients"),
@@ -56,4 +58,4 @@ async def setup_account(current_user: Annotated[User, Depends(get_current_user)]
             notes=meal.get("notes"),
         )
         create_current_user_meal(current_user.id, created_meal)
-    return {"meals": meals}
+    return current_user

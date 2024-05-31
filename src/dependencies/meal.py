@@ -23,7 +23,9 @@ def get_meal_snapshot(encodedUrl: str):
         return MealSnapshot(**deserialized_meal)
 
 
-def get_raw_current_user_meals(current_user_id: str) -> DynamoDBQueryResponse:
+def get_raw_current_user_meals(
+    current_user_id: str, limit: int
+) -> DynamoDBQueryResponse:
     response = dynamodb_client.query(
         TableName="MainTable",
         KeyConditionExpression="EntityType = :entityType AND begins_with(EntityId, :entityId)",
@@ -31,12 +33,13 @@ def get_raw_current_user_meals(current_user_id: str) -> DynamoDBQueryResponse:
             ":entityType": {"S": "account#meals"},
             ":entityId": {"S": current_user_id},
         },
+        Limit=limit,
     )
     return response
 
 
-def get_current_user_meals(current_user_id: str):
-    response = get_raw_current_user_meals(current_user_id)
+def get_current_user_meals(current_user_id: str, limit: int = 20):
+    response = get_raw_current_user_meals(current_user_id, limit)
     serialized_meals = response.get("Items")
     count = response.get("Count")
     if count == 0:
@@ -57,7 +60,7 @@ def create_current_user_meal(current_user_id: str, meal: MealCreate):
         description=meal.description,
         imageURLs=meal.imageURLs,
         snapshotURL=meal.snapshotURL,
-        notes=meal.notes
+        notes=meal.notes,
     ).model_dump()
     serialized_meal = serialize_item(new_meal)
     return dynamodb_client.put_item(
