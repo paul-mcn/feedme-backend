@@ -12,6 +12,5 @@ async def read_all_meals(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     # current_user.id
-    print("gotem")
     meals = get_all_meals()
     return meals
