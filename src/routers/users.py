@@ -6,7 +6,7 @@ from src.dependencies.meal import create_current_user_meal, get_current_user_mea
 from src.dependencies.env import get_environment_settings
 from ..schemas import MealCreate, User
 from ..dependencies.user import get_current_user
-from .meals import router as meals_router
+from .user_meals import router as meals_router
 from ..default_meals import meals
 
 settings = get_environment_settings()

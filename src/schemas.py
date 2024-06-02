@@ -109,6 +109,10 @@ class UserMeals(BaseEntity):
     userId: str
     meals: list[MealOut]
 
+class MealQueryResponse(BaseEntity):
+    count: int
+    meals: list
+
 
 class MealRecommendationInDB(BaseEntity):
     meal: MealIn

@@ -4,6 +4,7 @@ from ..schemas import (
     MealCreate,
     MealIn,
     MealOut,
+    MealQueryResponse,
     MealSnapshot,
     UserMeals,
 )
@@ -36,6 +37,30 @@ def get_raw_current_user_meals(
         Limit=limit,
     )
     return response
+
+
+def get_raw_all_meals(limit: int = 20) -> DynamoDBQueryResponse:
+    response = dynamodb_client.query(
+        TableName="MainTable",
+        KeyConditionExpression="EntityType = :entityType",
+        ExpressionAttributeValues={
+            ":entityType": {"S": "account#meals"},
+        },
+        Limit=limit,
+    )
+    return response
+
+
+def get_all_meals(limit: int = 20):
+    response = get_raw_all_meals(limit=limit)
+    serialized_meals = response.get("Items")
+    count = response.get("Count")
+    if count == 0:
+        return MealQueryResponse(count=0, meals=[])
+    deserialized_meals = [
+        MealOut(**deserialize_item(meal)) for meal in serialized_meals
+    ]
+    return MealQueryResponse(count=count, meals=deserialized_meals)
 
 
 def get_current_user_meals(current_user_id: str, limit: int = 20):
