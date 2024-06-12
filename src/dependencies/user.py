@@ -69,23 +69,6 @@ def put_user(email: str, password: str):
     return id
 
 
-# def get_user_by_email(email: str):
-#     try:
-#         response = dynamodb_client.query(
-#             TableName="MainTable",
-#             IndexName="EntityType-email-index",
-#             KeyConditionExpression="EntityType = :entityType AND email = :email",
-#             ExpressionAttributeValues={
-#                 ":entityType": {"S": "account"},
-#                 ":email": {"S": email},
-#             },
-#         )
-#         return response
-#     except botocore.exceptions.ClientError as e:
-#         error_message = f"An error occurred: {e.response['Error']['Message']}"
-#         return error_message
-
-
 def get_user_by_email(email: str):
     response = dynamodb_client.query(
         TableName="MainTable",
