@@ -71,6 +71,8 @@ class MealBase(BaseEntity):
     imageURLs: list[ImageURL]
     snapshotURL: str | None = None
     notes: str | None = None
+    isPublic: bool = False
+    follows: int = 0
 
 
 class MealIn(MealBase):
@@ -94,24 +96,14 @@ class MealOut(MealBase):
         return imageURLs
 
 
-class MealCreate(BaseEntity):
-    title: str
-    price: Decimal | None
-    ingredients: str | None
-    time: Optional[int] = None
-    description: Optional[str] = None
-    imageURLs: list[ImageURL]
-    snapshotURL: str | None = None
-    notes: str | None = None
-
-
 class UserMeals(BaseEntity):
     userId: str
     meals: list[MealOut]
 
+
 class MealQueryResponse(BaseEntity):
     count: int
-    meals: list
+    meals: list[MealOut]
 
 
 class MealRecommendationInDB(BaseEntity):

@@ -9,7 +9,7 @@ from ..dependencies.meal_recommendations import (
     create_recommended_meals,
     get_recommended_meals,
 )
-from ..schemas import MealCreate, MealIn, User, MealSnapshotRequestBody
+from ..schemas import MealIn, User, MealSnapshotRequestBody
 from urllib.parse import quote
 from ..dependencies.user import get_current_user
 from ..dependencies.meal import (
@@ -61,7 +61,8 @@ async def create_own_meal_recommendations(
 
 @router.post("/add")
 async def create_own_meal(
-    current_user: Annotated[User, Depends(get_current_user)], meal: MealCreate
+    current_user: Annotated[User, Depends(get_current_user)],
+    meal: Annotated[MealIn, Depends()],
 ):
 
     # TODO: web scrape url to get ingredients, title, and other info

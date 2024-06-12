@@ -63,6 +63,8 @@ def put_user(email: str, password: str):
             "firstName": {"NULL": True},
             "lastName": {"NULL": True},
             "hashedPassword": {"S": hashed_password},
+            "createdAt": {"S": datetime.now(timezone.utc).isoformat()},
+            "updatedAt": {"S": datetime.now(timezone.utc).isoformat()},
         },
         ConditionExpression="attribute_not_exists(EntityId)",
     )
