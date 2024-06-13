@@ -122,9 +122,11 @@ class UserMealRecommendations(BaseEntity):
     expirationDate: date
 
 
-class MealSnapshotRequestBody(BaseModel):
+class MealSnapshotRequest(BaseModel):
     url: str
 
+class FollowMealRequest(BaseModel):
+    mealId: str
 
 class MealSnapshot(MealOut):
     id: str = Field(validation_alias="EntityId")

@@ -9,14 +9,14 @@ from ..dependencies.meal_recommendations import (
     create_recommended_meals,
     get_recommended_meals,
 )
-from ..schemas import MealIn, User, MealSnapshotRequestBody
+from ..schemas import FollowMealRequest, MealIn, User, MealSnapshotRequest
 from urllib.parse import quote
 from ..dependencies.user import get_current_user
 from ..dependencies.meal import (
     create_current_user_meal,
     get_current_user_meals,
     get_meal_snapshot,
-    get_raw_current_user_meals,
+    follow_meal,
 )
 
 router = APIRouter()
@@ -25,8 +25,10 @@ router = APIRouter()
 @router.get("")
 async def read_own_meals(
     current_user: Annotated[User, Depends(get_current_user)],
+    limit: int = 20,
+    lastEvaluatedKey: str | None = None,
 ):
-    meals = get_current_user_meals(current_user.id)
+    meals = get_current_user_meals(current_user.id, limit, lastEvaluatedKey)
     return meals
 
 
@@ -46,13 +48,27 @@ async def create_own_meal_recommendations(
     current_user: Annotated[User, Depends(get_current_user)],
     week_start_date: date | None = None,
 ):
-    response = get_raw_current_user_meals(current_user.id, limit=7)
-    if response.get("Count") < 7:
+    user_meals = get_current_user_meals(current_user.id, limit=7)
+
+    if len(user_meals.meals) < 7:
         raise HTTPException(
             status_code=409, detail="Not enough meals to create recommendations"
         )
-    serialized_meals = response.get("Items")
-    deserialized_meals = [MealIn(**deserialize_item(meal)) for meal in serialized_meals]
+    deserialized_meals = [
+        MealIn(
+            mealId=meal.id,
+            title=meal.title,
+            ingredients=meal.ingredients,
+            time=meal.time,
+            price=meal.price,
+            imageURLs=meal.imageURLs,
+            snapshotURL=meal.snapshotURL,
+            notes=meal.notes,
+            description=meal.description,
+            follows=meal.follows,
+        )
+        for meal in user_meals.meals
+    ]
     recommendations = create_recommended_meals(
         current_user.id, deserialized_meals, week_start_date
     )
@@ -72,9 +88,18 @@ async def create_own_meal(
     return response
 
 
+@router.post("/follow")
+async def user_follow_meal(
+    meal: FollowMealRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    response = follow_meal(current_user.id, meal.mealId)
+    return response
+
+
 @router.post("/snapshot")
 async def upsert_meal_snapshot(
-    url: MealSnapshotRequestBody,
+    url: MealSnapshotRequest,
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     snapshotUrl = quote(url.url)

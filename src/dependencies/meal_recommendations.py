@@ -2,7 +2,6 @@ from typing import Optional
 from datetime import date, timedelta
 import random
 from src.dependencies.dates import get_start_of_week
-from src.dependencies.meal import get_raw_current_user_meals
 from src.types import DynamoDBQueryResponse
 from ..schemas import (
     MealIn,

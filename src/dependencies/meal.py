@@ -24,7 +24,7 @@ def get_meal_snapshot(encodedUrl: str):
         return MealSnapshot(**deserialized_meal)
 
 
-def get_raw_current_user_meals(
+def get_raw_user_followed_meals(
     current_user_id: str, limit: int
 ) -> DynamoDBQueryResponse:
     response = dynamodb_client.query(
@@ -36,6 +36,7 @@ def get_raw_current_user_meals(
         },
         Limit=limit,
     )
+    print(response)
     return response
 
 
@@ -67,11 +68,42 @@ def get_all_meals(limit: int = 20, lastEvaluatedKey: str | None = None):
     return MealQueryResponse(count=count, meals=deserialized_meals)
 
 
-def get_current_user_meals(current_user_id: str, limit: int = 20):
-    response = get_raw_current_user_meals(current_user_id, limit)
-    serialized_meals = response.get("Items")
-    count = response.get("Count")
+def batch_get_raw_meals(meal_ids: list[str]):
+    keys = [
+        {
+            "EntityType": {"S": "all#meals"},
+            "EntityId": {"S": meal_id},
+        }
+        for meal_id in meal_ids
+    ]
+    response = dynamodb_client.batch_get_item(
+        RequestItems={
+            "MainTable": {
+                "Keys": keys,
+                "ConsistentRead": True,
+            }
+        }
+    )
+    return response
+
+
+def get_current_user_meals(current_user_id: str, limit: int = 20, lastEvaluatedKey: str | None = None):
+    follow_response = get_raw_user_followed_meals(current_user_id, limit)
+    serialized_meals = follow_response.get("Items")
+    count = follow_response.get("Count")
     if count == 0:
+        return UserMeals(userId=current_user_id, meals=[])
+    meals_ids = []
+    for meal in serialized_meals:
+        user_and_meal_id = meal.get("EntityId").get("S")
+        meal_id = user_and_meal_id.split("#")[1]
+        if meal_id not in meals_ids:
+            meals_ids.append(meal_id)
+    meals_response = batch_get_raw_meals(meals_ids)
+    if meals_response.get("Count") == 0:
+        return UserMeals(userId=current_user_id, meals=[])
+    serialized_meals = meals_response.get("Responses").get("MainTable")
+    if serialized_meals is None or len(serialized_meals) == 0:
         return UserMeals(userId=current_user_id, meals=[])
     deserialized_meals = [
         MealOut(**deserialize_item(meal)) for meal in serialized_meals
@@ -112,7 +144,6 @@ def follow_meal(current_user_id: str, meal_id: str):
         },
         UpdateExpression="ADD follows :inc",
         ExpressionAttributeValues={":inc": {"N": "1"}},
-        ConditionExpression="attribute_not_exists(EntityId)",
     )
     dynamodb_client.put_item(
         TableName="MainTable",

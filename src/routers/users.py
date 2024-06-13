@@ -2,7 +2,6 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from src.dependencies.meal import (
     batch_follow_meals,
-    follow_meal,
     get_all_meals,
     get_current_user_meals,
 )
