@@ -19,5 +19,4 @@ async def read_all_meals(
     for meal in meals.meals:
         if meal.id not in [meal.id for meal in user_meals.meals]:
             filtered_meals.append(meal)
-    print(filtered_meals)
     return {"count": len(filtered_meals), "meals": filtered_meals}

@@ -36,7 +36,6 @@ def get_raw_user_followed_meals(
         },
         Limit=limit,
     )
-    print(response)
     return response
 
 
