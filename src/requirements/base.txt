@@ -1,8 +1,0 @@
-fastapi
-uvicorn[standard]
-passlib[bcrypt]
-python-jose[cryptography]
-python-multipart
-a2wsgi
-pydantic-settings
-boto3
